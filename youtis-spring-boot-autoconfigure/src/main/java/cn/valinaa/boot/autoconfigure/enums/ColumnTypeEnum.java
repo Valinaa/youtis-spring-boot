@@ -7,10 +7,13 @@ package cn.valinaa.boot.autoconfigure.enums;
  */
 
 public enum ColumnTypeEnum {
+    NONE(""),
     /**
      * Number type.
      */
     BIT("BIT"),
+    BINARY("BINARY"),
+    VARBINARY("VARBINARY"),
     TINYINT("TINYINT"),
     SMALLINT("SMALLINT"),
     MEDIUMINT("MEDIUMINT"),
@@ -18,7 +21,6 @@ public enum ColumnTypeEnum {
     INTEGER("INTEGER"),
     BIGINT("BIGINT"),
     DECIMAL("DECIMAL"),
-    NUMERIC("NUMERIC"),
     FLOAT("FLOAT"),
     DOUBLE("DOUBLE"),
     BOOL("BOOL"),
@@ -54,6 +56,7 @@ public enum ColumnTypeEnum {
      * Collection type.
      */
     SET("SET"),
+    // TODO need support
     ENUM("ENUM");
     
     private final String type;

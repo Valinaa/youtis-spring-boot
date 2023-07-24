@@ -4,7 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.valinaa.boot.autoconfigure.annotation.ColumnUsed;
 import cn.valinaa.boot.autoconfigure.annotation.TableClass;
 import cn.valinaa.boot.autoconfigure.annotation.YoutisScan;
-import cn.valinaa.boot.autoconfigure.enums.ColumnTypeEnum;
+import cn.valinaa.boot.autoconfigure.utils.ColumnValidation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -17,6 +17,7 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.lang.NonNull;
 
 import java.lang.reflect.Field;
+import java.util.*;
 
 /**
  * @author Valinaa
@@ -26,7 +27,7 @@ public class YoutisScanBeanDefinitionRegistryPostProcessor
         implements ImportBeanDefinitionRegistrar {
     
     private static final Log logger = LogFactory.getLog(
-            YoutisScanBeanDefinitionRegistryPostProcessor.class);
+            YoutisScan.class);
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata,
                                         @NonNull BeanDefinitionRegistry registry) {
@@ -44,11 +45,14 @@ public class YoutisScanBeanDefinitionRegistryPostProcessor
                         var beanDefinitions = scanner.findCandidateComponents(basePackage);
                         for (BeanDefinition beanDefinition : beanDefinitions) {
                             var className = beanDefinition.getBeanClassName();
+                            String DDL = null;
                             try {
-                                getFieldsNeedGenerated(Class.forName(className));
+                                DDL=getFieldsNeedGenerated(Class.forName(className));
                             } catch (ClassNotFoundException e) {
                                 logger.error(e.getMessage(),e);
                             }
+                            logger.info(DDL);
+                            // TODO !important
                         }
                     }
             }else{
@@ -59,27 +63,71 @@ public class YoutisScanBeanDefinitionRegistryPostProcessor
         }
     }
     
-    private void getFieldsNeedGenerated(Class<?> clazz){
+    private String getFieldsNeedGenerated(Class<?> clazz){
+        TableClass tableClass=clazz.getAnnotation(TableClass.class);
         Field[] fields = clazz.getDeclaredFields();
+        boolean hasColumnUsed=false;
+        String tableName= StrUtil.toUnderlineCase(tableClass.value().isBlank()
+                ?clazz.getSimpleName():tableClass.value());
+        String tableComment=tableClass.comment();
         for (Field field : fields) {
             if (field.isAnnotationPresent(ColumnUsed.class)) {
-                processColumnUsed(field);
+                hasColumnUsed = true;
+                break;
             }
         }
+        List<String> lengthList = new ArrayList<>();
+        List<String> typeList = new ArrayList<>();
+        List<String> primaries=new ArrayList<>();
+        String lengthLogContent="You have not set the length of field {} in Class "+clazz.getSimpleName() +", " +
+                "it will be set to default value.";
+        String typeLogContent="The types of field {} you set may not be recommended, " +
+                "they will follow your setting , but ensure they are right.";
+        StringBuilder DDL=new StringBuilder(StrUtil.format(
+                "CREATE TABLE IF NOT EXISTS `{}`(\n", tableName));
+        int count=0;
+        if (hasColumnUsed) {
+            for (Field field : fields) {
+                if (field.isAnnotationPresent(ColumnUsed.class)) {
+                    if(getDDL(lengthList, typeList,primaries, DDL, field,count)){
+                        count++;
+                    };
+                }
+            }
+        }else {
+            for (Field field : fields) {
+                if(getDDL(lengthList, typeList,primaries, DDL, field,count)){
+                    count++;
+                };
+            }
+        }
+        if(!lengthList.isEmpty()){
+            logger.info(StrUtil.format(lengthLogContent,lengthList.toString()));
+        }
+        if(!typeList.isEmpty()){
+            logger.warn(StrUtil.format(typeLogContent,typeList.toString()));
+        }
+        if(primaries.isEmpty()){
+            DDL.delete(DDL.length()-2,DDL.length());
+            logger.warn("Class `"+clazz.getSimpleName()+"`: You have not set primary key in this table !");
+        }else{
+            DDL.append(StrUtil.format("PRIMARY KEY({})", primaries.toString()
+                    .replace("[","")
+                    .replace("]","")));
+        }
+        DDL.append(StrUtil.format("\n){};",
+                tableComment.isBlank()?"":StrUtil.format(" COMMENT '{}'",tableComment)));
+        return DDL.toString();
     }
     
-    private void processColumnUsed(Field field){
-        ColumnUsed columnUsed = field.getAnnotation(ColumnUsed.class);
-        String columnName = columnUsed.value();
-        String comment = columnUsed.comment();
-        String defaultValue = columnUsed.defaultValue();
-        ColumnTypeEnum type = columnUsed.type();
-        int length = columnUsed.length();
-        boolean nullable = columnUsed.nullable();
-        if(columnName.isEmpty()){
-            columnName=StrUtil.toUnderlineCase(field.getName());
-        }
-        Class<?> javaType = field.getType();
-        // do something
+    private boolean getDDL(List<String> lengthInfo, List<String> typeWarn,List<String> primaries,
+                           StringBuilder DDL, Field field,int count) {
+        Map<String,List<String>> res= ColumnValidation.validate(field,count);
+        String columnDDL=res.get("result").get(0).trim();
+        DDL.append(columnDDL).append(",\n");
+        lengthInfo.addAll(res.get("lengthInfo"));
+        typeWarn.addAll(res.get("typeWarning"));
+        primaries.addAll(res.get("primary"));
+        return res.get("autoIncrement").isEmpty();
     }
 }
