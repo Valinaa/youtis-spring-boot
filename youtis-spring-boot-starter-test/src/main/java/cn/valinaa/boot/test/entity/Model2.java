@@ -1,6 +1,6 @@
 package cn.valinaa.boot.test.entity;
 
-import cn.valinaa.boot.autoconfigure.annotation.ColumnUsed;
+import cn.valinaa.boot.autoconfigure.annotation.YoutisColumn;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -11,15 +11,15 @@ import java.time.LocalDateTime;
 
 public class Model2 {
     
-    @ColumnUsed
+    @YoutisColumn
     private String m2Name;
     
-    @ColumnUsed
+    @YoutisColumn
     private Integer m2Id;
     
     private LocalDateTime m2Time;
     
-    @ColumnUsed
+    @YoutisColumn
     private Timestamp m2Other;
     
     public String getM2Name() {

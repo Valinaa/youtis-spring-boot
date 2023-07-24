@@ -1,9 +1,9 @@
 package cn.valinaa.boot.autoconfigure;
 
 import cn.hutool.core.util.StrUtil;
-import cn.valinaa.boot.autoconfigure.annotation.ColumnUsed;
-import cn.valinaa.boot.autoconfigure.annotation.TableClass;
+import cn.valinaa.boot.autoconfigure.annotation.YoutisColumn;
 import cn.valinaa.boot.autoconfigure.annotation.YoutisScan;
+import cn.valinaa.boot.autoconfigure.annotation.YoutisTable;
 import cn.valinaa.boot.autoconfigure.utils.ColumnValidation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,17 +17,22 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.lang.NonNull;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Valinaa
  */
 @Configuration
-public class YoutisScanBeanDefinitionRegistryPostProcessor
-        implements ImportBeanDefinitionRegistrar {
-    
+public class YoutisScanProcessor
+        implements ImportBeanDefinitionRegistrar{
+
     private static final Log logger = LogFactory.getLog(
             YoutisScan.class);
+    
+    
+    
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata,
                                         @NonNull BeanDefinitionRegistry registry) {
@@ -39,7 +44,7 @@ public class YoutisScanBeanDefinitionRegistryPostProcessor
             if (basePackages.length > 0) {
                     var scanner = new ClassPathBeanDefinitionScanner(registry, false);
                     var tableClassAnnotationFilter = new AnnotationTypeFilter(
-                            TableClass.class,false,true);
+                            YoutisTable.class,false,true);
                     scanner.addIncludeFilter(tableClassAnnotationFilter);
                     for (String basePackage : basePackages) {
                         var beanDefinitions = scanner.findCandidateComponents(basePackage);
@@ -51,12 +56,15 @@ public class YoutisScanBeanDefinitionRegistryPostProcessor
                             } catch (ClassNotFoundException e) {
                                 logger.error(e.getMessage(),e);
                             }
-                            logger.info(DDL);
-                            // TODO !important
+                            if(DDL==null){
+                                logger.warn("DDL is null, Youtis will not work.");
+                            }else{
+                                logger.info(DDL);
+                            }
                         }
                     }
             }else{
-                logger.warn("No package to scan, have you set package name in @YoutisScan ?");
+                logger.warn("No packages to scan, have you set package name in @YoutisScan ?");
             }
         }else{
             logger.warn("Not found @EntityScan, have you set it on Application ?");
@@ -64,15 +72,15 @@ public class YoutisScanBeanDefinitionRegistryPostProcessor
     }
     
     private String getFieldsNeedGenerated(Class<?> clazz){
-        TableClass tableClass=clazz.getAnnotation(TableClass.class);
+        YoutisTable youtisTable =clazz.getAnnotation(YoutisTable.class);
         Field[] fields = clazz.getDeclaredFields();
-        boolean hasColumnUsed=false;
-        String tableName= StrUtil.toUnderlineCase(tableClass.value().isBlank()
-                ?clazz.getSimpleName():tableClass.value());
-        String tableComment=tableClass.comment();
+        boolean hasYoutisColumn=false;
+        String tableName= StrUtil.toUnderlineCase(youtisTable.value().isBlank()
+                ?clazz.getSimpleName(): youtisTable.value());
+        String tableComment= youtisTable.comment();
         for (Field field : fields) {
-            if (field.isAnnotationPresent(ColumnUsed.class)) {
-                hasColumnUsed = true;
+            if (field.isAnnotationPresent(YoutisColumn.class)) {
+                hasYoutisColumn = true;
                 break;
             }
         }
@@ -86,19 +94,19 @@ public class YoutisScanBeanDefinitionRegistryPostProcessor
         StringBuilder DDL=new StringBuilder(StrUtil.format(
                 "CREATE TABLE IF NOT EXISTS `{}`(\n", tableName));
         int count=0;
-        if (hasColumnUsed) {
+        if (hasYoutisColumn) {
             for (Field field : fields) {
-                if (field.isAnnotationPresent(ColumnUsed.class)) {
+                if (field.isAnnotationPresent(YoutisColumn.class)) {
                     if(getDDL(lengthList, typeList,primaries, DDL, field,count)){
                         count++;
-                    };
+                    }
                 }
             }
         }else {
             for (Field field : fields) {
                 if(getDDL(lengthList, typeList,primaries, DDL, field,count)){
                     count++;
-                };
+                }
             }
         }
         if(!lengthList.isEmpty()){

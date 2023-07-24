@@ -1,7 +1,6 @@
 package cn.valinaa.boot.test;
 
-import cn.valinaa.boot.autoconfigure.annotation.ColumnUsed;
-import cn.valinaa.boot.autoconfigure.annotation.TableClass;
+import cn.valinaa.boot.autoconfigure.annotation.YoutisTable;
 
 import java.time.LocalDateTime;
 
@@ -10,7 +9,7 @@ import java.time.LocalDateTime;
  *
  * @author Valinaa
  */
-@TableClass
+@YoutisTable
 public class YoutisModelOne {
     @ColumnUsed
     private Long id;

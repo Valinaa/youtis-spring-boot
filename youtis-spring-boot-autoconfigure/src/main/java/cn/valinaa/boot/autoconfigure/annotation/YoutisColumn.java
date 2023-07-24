@@ -13,7 +13,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 @Documented
-public @interface ColumnUsed {
+public @interface YoutisColumn {
     /**
      * The column name.
      */

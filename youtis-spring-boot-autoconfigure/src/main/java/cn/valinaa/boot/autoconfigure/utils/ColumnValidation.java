@@ -1,8 +1,8 @@
 package cn.valinaa.boot.autoconfigure.utils;
 
 import cn.hutool.core.util.StrUtil;
-import cn.valinaa.boot.autoconfigure.annotation.ColumnPrimary;
-import cn.valinaa.boot.autoconfigure.annotation.ColumnUsed;
+import cn.valinaa.boot.autoconfigure.annotation.YoutisColumn;
+import cn.valinaa.boot.autoconfigure.annotation.YoutisPrimary;
 import cn.valinaa.boot.autoconfigure.enums.ColumnTypeEnum;
 import cn.valinaa.boot.autoconfigure.enums.SignTypeEnum;
 import org.apache.commons.logging.Log;
@@ -31,18 +31,18 @@ public final class ColumnValidation {
         List<String> lengthList = new ArrayList<>();
         List<String> typeList = new ArrayList<>();
         List<String> primaryList=new ArrayList<>();
-        if(field.isAnnotationPresent(ColumnPrimary.class)){
+        if(field.isAnnotationPresent(YoutisPrimary.class)){
             primaryList.add(field.getName());
         }
-        ColumnUsed columnUsed = field.getAnnotation(ColumnUsed.class);
-        String columnName = columnUsed.value();
-        ColumnTypeEnum type = columnUsed.type();
-        int length = columnUsed.length();
-        SignTypeEnum signType = columnUsed.signType();
-        String comment = columnUsed.comment();
-        String defaultValue = columnUsed.defaultValue();
-        boolean nullable = columnUsed.nullable();
-        boolean autoIncrement = columnUsed.autoIncrement();
+        YoutisColumn youtisColumn = field.getAnnotation(YoutisColumn.class);
+        String columnName = youtisColumn.value();
+        ColumnTypeEnum type = youtisColumn.type();
+        int length = youtisColumn.length();
+        SignTypeEnum signType = youtisColumn.signType();
+        String comment = youtisColumn.comment();
+        String defaultValue = youtisColumn.defaultValue();
+        boolean nullable = youtisColumn.nullable();
+        boolean autoIncrement = youtisColumn.autoIncrement();
         
         columnName = StrUtil.toUnderlineCase(columnName.isBlank() ?
                 field.getName() : columnName);
@@ -113,10 +113,12 @@ public final class ColumnValidation {
                 nowType.add(ColumnTypeEnum.VARCHAR);
             }
         };
+        // Validate data type
         if (!nowType.contains(type) && type != ColumnTypeEnum.NONE) {
             typeList.add(field.getName());
         }
         type = type == ColumnTypeEnum.NONE ? nowType.get(0) : type;
+        // Whether to use length
         if (isIntegerType(type)) {
             if (signType != SignTypeEnum.UNSIGNED_ZEROFILL
                     && (type == ColumnTypeEnum.TINYINT && length != 0)) {
@@ -126,6 +128,7 @@ public final class ColumnValidation {
         if(isTextType(type)||isDateType(type)){
             lengthRequired=false;
         }
+        // Check default value
         if(StrUtil.equalsAnyIgnoreCase(defaultValue.trim(), "null")) {
             defaultValue = "NULL";
         }else{
@@ -135,6 +138,7 @@ public final class ColumnValidation {
                 defaultValue= "'"+defaultValue+"'";
             }
         }
+        // Validate nullable
         if(!nullable){
             if(defaultValue.equals("NULL")){
                 logger.warn("Column `"+field.getName()+"`: default value is NULL, " +
@@ -142,6 +146,7 @@ public final class ColumnValidation {
                 nullable=true;
             }
         }
+        // Validate autoIncrement
         if(autoIncrement){
             if(isIntegerType(type)){
                 logger.warn("Column `"+field.getName()+"`: Auto_Increment only support INTEGER type, it will be set to false.");
@@ -156,7 +161,7 @@ public final class ColumnValidation {
                 autoIncrement=false;
             }
         }
-        
+        // Generate DDL
         String tableDDL = StrUtil.format("`{}` {}{}{} {}{}{}{}",
                 columnName,
                 type.getType(),
@@ -172,6 +177,7 @@ public final class ColumnValidation {
         result.put("lengthInfo", lengthList);
         result.put("typeWarning", typeList);
         result.put("primary", primaryList);
+        // No duplicate AUTO_INCREMENT
         result.put("autoIncrement", new ArrayList<>() {{
             add("autoIncremented");
         }});

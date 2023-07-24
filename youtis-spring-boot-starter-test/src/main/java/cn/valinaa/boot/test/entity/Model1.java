@@ -1,8 +1,8 @@
 package cn.valinaa.boot.test.entity;
 
-import cn.valinaa.boot.autoconfigure.annotation.ColumnPrimary;
-import cn.valinaa.boot.autoconfigure.annotation.ColumnUsed;
-import cn.valinaa.boot.autoconfigure.annotation.TableClass;
+import cn.valinaa.boot.autoconfigure.annotation.YoutisColumn;
+import cn.valinaa.boot.autoconfigure.annotation.YoutisPrimary;
+import cn.valinaa.boot.autoconfigure.annotation.YoutisTable;
 import cn.valinaa.boot.autoconfigure.enums.ColumnTypeEnum;
 
 import java.time.LocalDateTime;
@@ -10,19 +10,19 @@ import java.time.LocalDateTime;
 /**
  * @author Valinaa
  */
-@TableClass(value = "modelFirst",comment = "测试表")
+@YoutisTable(value = "modelFirst",comment = "测试表")
 public class Model1 {
     
-    @ColumnUsed(value = "VIP",type = ColumnTypeEnum.TINYTEXT,comment = "姓名",
+    @YoutisColumn(value = "VIP",type = ColumnTypeEnum.TINYTEXT,comment = "姓名",
             defaultValue = "Valinaa",nullable = false, autoIncrement = true)
-    @ColumnPrimary
+    @YoutisPrimary
     private String name;
     
-    @ColumnUsed
-    @ColumnPrimary
+    @YoutisColumn
+    @YoutisPrimary
     private Long id;
     
-    @ColumnUsed
+    @YoutisColumn
     private LocalDateTime time;
     
     private String other;

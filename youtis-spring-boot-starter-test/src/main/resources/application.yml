@@ -1,0 +1,11 @@
+youtis:
+  enabled: true
+  output:
+    enabled: true
+    path: youtis_output
+spring:
+  datasource:
+    username: youtis
+    password: youtis
+    url: jdbc:mysql://system.valinaa-wei.tech:3306/youtis_dev?serverTimezone=GMT%2B8&useSSL=false&useUnicode=true&characterEncoding=utf-8
+    driver-class-name: com.mysql.cj.jdbc.Driver

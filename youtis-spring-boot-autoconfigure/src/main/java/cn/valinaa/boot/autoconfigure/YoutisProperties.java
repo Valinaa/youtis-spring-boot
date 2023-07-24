@@ -13,14 +13,26 @@ public class YoutisProperties {
     public static final String YOUTIS_PREFIX = "youtis";
     
     /**
-     * The location of the SQL output file.
+     * Enable Youtis.
      */
-    private String outputLocation= "youtis";
-    
-    public String getOutputLocation() {
-        return outputLocation;
+    private boolean enabled = true;
+    /**
+     * Output properties.
+     */
+    private OutputProperties outputProperties;
+    public boolean isEnabled() {
+        return enabled;
     }
-    public void setOutputLocation(String outputLocation) {
-        this.outputLocation = outputLocation;
+    
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+    
+    public OutputProperties getOutputProperties() {
+        return outputProperties;
+    }
+    
+    public void setOutputProperties(OutputProperties outputProperties) {
+        this.outputProperties = outputProperties;
     }
 }

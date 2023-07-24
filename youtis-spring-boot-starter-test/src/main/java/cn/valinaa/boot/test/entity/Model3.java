@@ -1,8 +1,8 @@
 package cn.valinaa.boot.test.entity;
 
-import cn.valinaa.boot.autoconfigure.annotation.ColumnPrimary;
-import cn.valinaa.boot.autoconfigure.annotation.ColumnUsed;
-import cn.valinaa.boot.autoconfigure.annotation.TableClass;
+import cn.valinaa.boot.autoconfigure.annotation.YoutisColumn;
+import cn.valinaa.boot.autoconfigure.annotation.YoutisPrimary;
+import cn.valinaa.boot.autoconfigure.annotation.YoutisTable;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -13,13 +13,13 @@ import java.time.LocalDateTime;
  * @author Valinaa
  */
 
-@TableClass
+@YoutisTable
 public class Model3 {
     
-    @ColumnUsed(defaultValue = "")
+    @YoutisColumn(defaultValue = "")
     private String m3Name;
     
-    @ColumnUsed(defaultValue = "1")
+    @YoutisColumn(defaultValue = "1")
     private Integer m3Id;
     
     public int getM3Age() {
@@ -31,10 +31,10 @@ public class Model3 {
     }
     
     private int m3Age;
-    @ColumnPrimary
+    @YoutisPrimary
     private LocalDateTime m3Time;
     
-    @ColumnUsed
+    @YoutisColumn
     private Timestamp m3Other;
     
     public String getM3Name() {
