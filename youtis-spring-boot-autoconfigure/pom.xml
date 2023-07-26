@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>cn.valinaa.boot</groupId>
+        <groupId>tech.valinaa.boot</groupId>
         <artifactId>youtis-spring-boot</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.1.0</version>
     </parent>
 
     <artifactId>youtis-spring-boot-autoconfigure</artifactId>
@@ -15,12 +15,22 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <hutool.version>5.8.16</hutool.version>
     </properties>
 <dependencies>
     <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-log4j2</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-jdbc</artifactId>
+        <optional>true</optional>
+    </dependency>
+    <dependency>
         <groupId>cn.hutool</groupId>
         <artifactId>hutool-core</artifactId>
-        <version>5.8.16</version>
+        <version>${hutool.version}</version>
     </dependency>
     <dependency>
         <groupId>org.springframework.boot</groupId>

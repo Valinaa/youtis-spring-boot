@@ -2,7 +2,7 @@ youtis:
   enabled: true
   output:
     enabled: true
-    path: youtis_output
+    path: youtis
 spring:
   datasource:
     username: youtis
