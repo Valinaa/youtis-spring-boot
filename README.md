@@ -1,7 +1,7 @@
 <br>
 
 <p align='center'>
-<b>English</b> | <a href="https://github.com/Valinaa/youtis-spring-boot/blob/main/README.zh-CN.md">简体中文</a>
+<b>English</b> | <a href="https://github.com/Valinaa/youtis-spring-boot/blob/master/README.zh-CN.md">简体中文</a>
 </p>
 
 <br>
@@ -24,8 +24,8 @@
 
 ```xml
 <dependency>
-<groupId>tech.valinaa.boot</groupId>
-<artifactId>youtis-spring-boot-starter</artifactId>
-<version>0.1.0</version>
+    <groupId>tech.valinaa.boot</groupId>
+    <artifactId>youtis-spring-boot-starter</artifactId>
+    <version>0.1.0</version>
 </dependency>
 ```
