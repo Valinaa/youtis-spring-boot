@@ -27,10 +27,10 @@ public final class ColumnValidation {
     }
     
     public static Map<String, List<String>> validate(Field field, int count, boolean optional) {
-        Map<String, List<String>> result = new HashMap<>(8);
-        List<String> lengthList = new ArrayList<>();
-        List<String> typeList = new ArrayList<>();
-        List<String> primaryList = new ArrayList<>();
+        var result = new HashMap<String, List<String>>(8);
+        var lengthList = new ArrayList<String>();
+        var typeList = new ArrayList<String>();
+        var primaryList = new ArrayList<String>();
         if (field.isAnnotationPresent(YoutisPrimary.class)) {
             if (!field.isAnnotationPresent(YoutisColumn.class) && optional) {
                 logger.warn("Found @YoutisPrimary but no @YoutisColumn on the field `{}`. Ignored.",
@@ -38,15 +38,11 @@ public final class ColumnValidation {
                 return null;
             }
         }
-        YoutisColumn youtisColumn = field.getAnnotation(YoutisColumn.class);
-        String columnName = youtisColumn.value();
-        ColumnTypeEnum type = youtisColumn.type();
-        int length = youtisColumn.length();
-        SignTypeEnum signType = youtisColumn.signType();
-        String comment = youtisColumn.comment();
-        String defaultValue = youtisColumn.defaultValue();
-        boolean nullable = youtisColumn.nullable();
-        boolean autoIncrement = youtisColumn.autoIncrement();
+        var youtisColumn = field.getAnnotation(YoutisColumn.class);
+        var columnName = youtisColumn.value();
+        var type = youtisColumn.type();
+        var length = youtisColumn.length();
+        
         
         columnName = StrUtil.toUnderlineCase(columnName.isBlank() ?
                 field.getName() : columnName);
@@ -55,12 +51,12 @@ public final class ColumnValidation {
             primaryList.add(columnName);
         }
         
-        boolean lengthRequired = true;
+        var lengthRequired = true;
         if (length == 0) {
             lengthList.add(field.getName());
         }
         Class<?> javaType = field.getType();
-        List<ColumnTypeEnum> nowType = new ArrayList<>();
+        var nowType = new ArrayList<ColumnTypeEnum>();
         switch (javaType.getSimpleName()) {
             // TODO support BINARY using Byte[]
             case "Boolean" -> {
@@ -125,6 +121,8 @@ public final class ColumnValidation {
             typeList.add(field.getName());
         }
         type = type == ColumnTypeEnum.NONE ? nowType.get(0) : type;
+        
+        var signType = youtisColumn.signType();
         // Whether to use length
         if (isIntegerType(type)) {
             if (signType != SignTypeEnum.UNSIGNED_ZEROFILL
@@ -135,6 +133,9 @@ public final class ColumnValidation {
         if (isTextType(type) || isDateType(type)) {
             lengthRequired = false;
         }
+        
+        var defaultValue = youtisColumn.defaultValue();
+        var nullable = youtisColumn.nullable();
         // Check default value
         if (StrUtil.equalsAnyIgnoreCase(defaultValue.trim(), "null")) {
             defaultValue = "NULL";
@@ -153,6 +154,8 @@ public final class ColumnValidation {
                 nullable = true;
             }
         }
+        
+        var autoIncrement = youtisColumn.autoIncrement();
         // Validate autoIncrement
         if (autoIncrement) {
             if (!isIntegerType(type)) {
@@ -168,6 +171,8 @@ public final class ColumnValidation {
                 autoIncrement = false;
             }
         }
+        
+        var comment = youtisColumn.comment();
         // Generate DDL
         String tableDDL = StrUtil.format("`{}` {}{}{} {}{}{}{}",
                 columnName,

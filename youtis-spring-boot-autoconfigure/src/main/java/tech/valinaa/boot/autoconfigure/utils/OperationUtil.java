@@ -41,8 +41,8 @@ public final class OperationUtil {
         if (!FileUtil.exist(targetDir)) {
             FileUtil.mkdir(targetDir);
         }
-        String tableName = StrUtil.toUnderlineCase(name);
-        String fileName = StrUtil.format("{}_ddl.sql", tableName);
+        var tableName = StrUtil.toUnderlineCase(name);
+        var fileName = StrUtil.format("{}_ddl.sql", tableName);
         path = StrUtil.format("{}/{}", path, fileName);
         logger.info("Table `{}` :Output to `{}` started.", name, path);
         try {

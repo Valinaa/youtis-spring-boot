@@ -23,6 +23,7 @@ import tech.valinaa.boot.autoconfigure.property.OutputProperties;
 import tech.valinaa.boot.autoconfigure.property.YoutisProperties;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Valinaa
@@ -86,15 +87,13 @@ public class YoutisAutoConfiguration {
                     for (String basePackage : basePackages) {
                         var beanDefinitions = scanner.findCandidateComponents(basePackage);
                         for (BeanDefinition beanDefinition : beanDefinitions) {
-                            var className = beanDefinition.getBeanClassName();
-                            if (className == null) {
-                                logger.warn("Unexpected Warning: Class name is null, it will be ignored.");
-                                continue;
-                            }
-                            registry.registerBeanDefinition(className, beanDefinition);
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("Found @YoutisTable class: {}", className);
-                            }
+                            Optional.ofNullable(beanDefinition.getBeanClassName())
+                                    .ifPresent(className -> {
+                                        registry.registerBeanDefinition(className, beanDefinition);
+                                        if (logger.isDebugEnabled()) {
+                                            logger.debug("Found @YoutisTable class: {}", className);
+                                        }
+                                    });
                         }
                     }
                 } else {
