@@ -1,7 +1,7 @@
 package tech.valinaa.boot.autoconfigure;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -33,7 +33,7 @@ import java.util.Optional;
 @EnableConfigurationProperties({YoutisProperties.class, OutputProperties.class})
 public class YoutisAutoConfiguration {
     
-    private static final Logger logger = LoggerFactory.getLogger(
+    private static final Logger log = LogManager.getLogger(
             YoutisAutoConfiguration.class);
     private final YoutisProperties youtisProperties;
     
@@ -62,24 +62,22 @@ public class YoutisAutoConfiguration {
         public void registerBeanDefinitions(@NonNull AnnotationMetadata importingClassMetadata,
                                             @NonNull BeanDefinitionRegistry registry) {
             
-            if (logger.isDebugEnabled()) {
+            if (log.isDebugEnabled()) {
                 if (!AutoConfigurationPackages.has(this.beanFactory)) {
-                    logger.debug("Could not determine auto-configuration package, automatic mapper scanning disabled.");
+                    log.debug("Could not determine auto-configuration package, automatic mapper scanning disabled.");
                     return;
                 }
-                logger.debug("Searching for classes annotated with @YoutisTable");
+                log.debug("Searching for classes annotated with @YoutisTable");
                 List<String> packages = AutoConfigurationPackages.get(this.beanFactory);
-                packages.forEach(pkg -> logger.debug("Using auto-configuration base package '{}'", pkg));
+                packages.forEach(pkg -> log.debug("Using auto-configuration base package '{}'", pkg));
             }
             var annotations = importingClassMetadata.getAnnotations();
             if (annotations.isPresent(YoutisScan.class)) {
                 var basePackages = annotations.get(YoutisScan.class)
                         .getStringArray("value");
                 if (basePackages.length > 0) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Found @YoutisScan, will scan packages: {}",
-                                String.join(",", basePackages));
-                    }
+                    log.debug("Found @YoutisScan, will scan packages: {}",
+                            () -> String.join(",", basePackages));
                     var scanner = new ClassPathBeanDefinitionScanner(registry, false);
                     var tableClassAnnotationFilter = new AnnotationTypeFilter(
                             YoutisTable.class, false, true);
@@ -90,17 +88,15 @@ public class YoutisAutoConfiguration {
                             Optional.ofNullable(beanDefinition.getBeanClassName())
                                     .ifPresent(className -> {
                                         registry.registerBeanDefinition(className, beanDefinition);
-                                        if (logger.isDebugEnabled()) {
-                                            logger.debug("Found @YoutisTable class: {}", className);
-                                        }
+                                        log.debug("Found @YoutisTable class: {}", className);
                                     });
                         }
                     }
                 } else {
-                    logger.warn("Not found any package to scan, have you set a package name in @YoutisScan ?");
+                    log.warn("Not found any package to scan, have you set a package name in @YoutisScan ?");
                 }
             } else {
-                logger.warn("Not found @YoutisScan, have you set it on SpringApplication ?");
+                log.warn("Not found @YoutisScan, have you set it on SpringApplication ?");
             }
         }
         
